@@ -16,7 +16,7 @@ namespace ElasticsearchTrainingSample
     {
         static void Main(string[] args)
         {
-            var elasticUrl = "http://127.0.0.1:9200";  
+            var elasticUrl = "http://127.0.0.1:9200";
             var connectionSettings = new ConnectionSettings(new Uri(elasticUrl)).DefaultIndex("news-deneme");
             var client = new ElasticClient(connectionSettings);
 
@@ -54,6 +54,15 @@ namespace ElasticsearchTrainingSample
                                                                    NumberOfReplicas(1).
                                                                    Analysis(a => a.Analyzers(b => b.UserDefined("default", analyzer)))).
                                                                    Mappings(m => m.Map<News>(d => d.AutoMap())));
+        }
+        public static void CreateIndexWithEdgeNGram(ElasticClient client)
+        {
+            client.CreateIndex("edge-deneme", c => c.Settings(s => s.NumberOfShards(1).
+                                                                   NumberOfReplicas(1).
+                                                                   Analysis(analysis => analysis.Analyzers(analyzers => analyzers
+                                        .Custom("auto-complete", a => a.Tokenizer("standard").Filters("lowercase", "asciifolding", "standard", "auto-complete-filter"))
+                                        .Custom("default", a => a.Tokenizer("standard").Filters("lowercase", "asciifolding", "word_delimiter").CharFilters("html_strip")))
+                                        .TokenFilters(tokenFilter => tokenFilter.EdgeNGram("auto-complete-filter", t => t.MinGram(3).MaxGram(8))))));
         }
         public static void DataSeed(ElasticClient client)
         {

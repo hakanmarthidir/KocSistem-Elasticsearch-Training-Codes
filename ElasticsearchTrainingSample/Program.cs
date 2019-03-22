@@ -62,7 +62,8 @@ namespace ElasticsearchTrainingSample
                                                                    Analysis(analysis => analysis.Analyzers(analyzers => analyzers
                                         .Custom("auto-complete", a => a.Tokenizer("standard").Filters("lowercase", "asciifolding", "standard", "auto-complete-filter"))
                                         .Custom("default", a => a.Tokenizer("standard").Filters("lowercase", "asciifolding", "word_delimiter").CharFilters("html_strip")))
-                                        .TokenFilters(tokenFilter => tokenFilter.EdgeNGram("auto-complete-filter", t => t.MinGram(3).MaxGram(8))))));
+                                        .TokenFilters(tokenFilter => tokenFilter.EdgeNGram("auto-complete-filter", t => t.MinGram(3).MaxGram(8)))))
+                                        .Mappings(m=>m.Map<News>(mp => mp.Properties(p=>p.Text(t=>t.Name(n=>n.NewsTitle).Analyzer("auto-complete"))))));
         }
         public static void DataSeed(ElasticClient client)
         {
